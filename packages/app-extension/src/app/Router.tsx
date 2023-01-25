@@ -13,12 +13,12 @@ import {
   QUERY_LOCKED,
   toTitleCase,
 } from "@coral-xyz/common";
+import { refreshFriendships, refreshGroups } from "@coral-xyz/db";
 import {
-  refreshFriendships,
-  refreshGroups,
+  EmptyState,
+  refreshGroupsAndFriendships,
   SignalingManager,
-} from "@coral-xyz/db";
-import { EmptyState } from "@coral-xyz/react-common";
+} from "@coral-xyz/react-common";
 import {
   KeyringStoreStateEnum,
   useApprovedOrigins,
@@ -76,8 +76,7 @@ function _Router() {
   const { uuid, jwt } = useUser();
 
   useEffect(() => {
-    refreshFriendships(uuid);
-    refreshGroups(uuid).catch((e) => console.error(e));
+    refreshGroupsAndFriendships(uuid);
     SignalingManager.getInstance().updateUuid(uuid, jwt);
   }, [uuid, jwt]);
 
@@ -185,8 +184,8 @@ function QueryApproval() {
   }
 
   return (
-    <WithEnabledBlockchain blockchain={blockchain!}>
-      <WithUnlock>
+    <WithUnlock>
+      <WithEnabledBlockchain blockchain={blockchain!}>
         <ApproveOrigin
           origin={origin}
           title={title}
@@ -198,8 +197,8 @@ function QueryApproval() {
             });
           }}
         />
-      </WithUnlock>
-    </WithEnabledBlockchain>
+      </WithEnabledBlockchain>
+    </WithUnlock>
   );
 }
 
@@ -358,7 +357,7 @@ function WithEnabledBlockchain({
         <EmptyState
           icon={(props: any) => <BlockIcon {...props} />}
           title={`${toTitleCase(blockchain)} is disabled`}
-          subtitle={`Enable ${toTitleCase(blockchain)} in blockchain settings`}
+          subtitle={`Add a ${toTitleCase(blockchain)} wallet in Backpack`}
         />
       )}
     </>
